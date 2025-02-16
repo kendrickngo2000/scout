@@ -1,14 +1,22 @@
+import os
 import requests
 import urllib.parse
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
 from flask import Flask, redirect, request, jsonify, session
+
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = '542uih24-sdfd-dfd4-3433-9213k242k4'
-
 CLIENT_ID = '625cacae453a47b9936b6ded6f42e390'
 CLIENT_SECRET = '94522f7427764dd684c5c80376c4a7b5'
 REDIRECT_URI = 'http://localhost:8000/callback'
+
+# app.secret_key = os.getenv("SECRET_KEY")
+# CLIENT_ID = os.getenv("CLIENT_ID")
+# CLIENT_SECRET = os.getenv("SECRET_KEY")
+# REDIRECT_URI = os.getenv("REDIRECT_URI")
 
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
@@ -17,7 +25,7 @@ API_BASE_URL = 'https://api.spotify.com/v1/'
 
 @app.route('/')
 def index():
-    return "Welcome to my scout <a href='/login'>Login with Spotify</a>"
+    return "Welcome to scout <a href='/login'>Login with Spotify</a>"
 
 @app.route('/login')
 def login():
