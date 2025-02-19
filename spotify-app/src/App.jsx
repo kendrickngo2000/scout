@@ -7,9 +7,26 @@ function App() {
   const [topTracks, setTopTracks] = useState(null)
 
   // Placeholder function for login/logout
-  const handleLoginClick = () => {
-    setIsLoggedIn(!isLoggedIn)
-    setUserName(isLoggedIn ? '' : 'John Doe') // Replace with actual user name from Spotify API
+  const handleLoginClick = async () => {
+    if (isLoggedIn) {
+      // login logic
+      setIsLoggedIn(false)
+      setUserName('')
+      setTopTracks(null)
+    } else {
+      try {
+        const response = await fetch('/login', {
+          headers: {
+            'X-Requested-With':
+            'XMLHttpRequest'
+          }
+        });
+        const data = await response.json()
+          window.location.href = data.auth_url
+      } catch (error) {
+        console.error('Error during login:', error)
+      }
+    }
   }
 
   // Placeholder function for fetching top tracks
@@ -29,7 +46,7 @@ function App() {
         <nav className="container mx-auto flex justify-between items-center">
           <div className="flex items-center">
             <img src="/path-to-your-logo.svg" alt="Logo" className="w-8 h-8 mr-2" />
-            <h1 className="text-xl font-bold">Top Tracks Showcase</h1>
+            <h1 className="text-xl font-bold">Scout</h1>
           </div>
           <button 
             className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-full"

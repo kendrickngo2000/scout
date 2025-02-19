@@ -41,8 +41,12 @@ def login():
 
     auth_url = f"{AUTH_URL}?{urllib.parse.urlencode(params)}"
 
-
-    return redirect(auth_url)
+    # Frontend login request
+    if request.headers.get('X-Requested-With') == 'XML HttpRequest':
+        return jsonify({'auth_url' : auth_url})
+    else:
+        # direct browswer requests or backend-initiated flows
+        return redirect(auth_url)
 
 
 @app.route('/callback')
