@@ -4,15 +4,16 @@ import urllib.parse
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from flask import Flask, redirect, request, jsonify, session
+from flask_cors import CORS
 
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app)   # flask_cors
 app.secret_key = '542uih24-sdfd-dfd4-3433-9213k242k4'
 CLIENT_ID = '625cacae453a47b9936b6ded6f42e390'
 CLIENT_SECRET = '94522f7427764dd684c5c80376c4a7b5'
 REDIRECT_URI = 'http://localhost:8000/callback'
-
 # app.secret_key = os.getenv("SECRET_KEY")
 # CLIENT_ID = os.getenv("CLIENT_ID")
 # CLIENT_SECRET = os.getenv("SECRET_KEY")
@@ -71,6 +72,7 @@ def callback():
         session['expires_at'] = datetime.now().timestamp() + token_info['expires_in']  # seconds (one day)
 
         return redirect('/playlists')
+    return jsonify({"error": "No code provided"}), 400
     
 
 @app.route('/playlists')
