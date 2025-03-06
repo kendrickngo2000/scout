@@ -100,7 +100,7 @@ def refresh_token():
     
     if datetime.now().timestamp() > session['expires_at']:
         req_body = {
-            'grant_time': 'refresh_token',
+            'grant_type': 'refresh_token',
             'refresh_token': session['refresh_token'],
             'client_id': CLIENT_ID,
             'client_secret': CLIENT_SECRET
@@ -113,6 +113,24 @@ def refresh_token():
         session['expires_at'] = datetime.now().timestamp() + new_token_info['expires_in'] 
 
         return redirect('/playlists')
+
+
+@app.route('/top-tracks')
+def get_top_tracks():
+    if 'access_token' not in session:
+        return redirect('/login')
+
+    if datetime.now().timestamp() > session['expires_at']:
+        return redirect('/refresh-token')
+    
+    headers = {
+        'Authorization': f"Bearer {session['access_token']}"
+    }
+
+    response = requests.get(API_BASE_URL + 'me/top/tracks', headers=headers)
+    top_tracks = response.json()
+
+    return jsonify(top_tracks)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)

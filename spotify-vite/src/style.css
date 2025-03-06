@@ -94,3 +94,27 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+#spotify-login {
+  display: block;
+  margin: 0 auto;
+  padding: 10px 20px;
+  background-color: #1DB954;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 16px;
+}
+
+#spotify-login:hover {
+  background-color: #1ed760;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
