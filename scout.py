@@ -53,7 +53,7 @@ if st.session_state.show_tracks:
     df.set_index('track_name', inplace=True)
 
     # display bar chart
-    st.subheader('Audio Features for Top Tracks')
+    st.subheader('top tracks')
     st.bar_chart(df, height=500)
 
     # display clickable links for each song
