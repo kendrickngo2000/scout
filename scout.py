@@ -3,6 +3,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 
 CLIENT_ID = os.environ.get('CLIENT_ID')
 CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
@@ -23,6 +24,8 @@ st.write('lets see what u listening to')
 
 if 'show_tracks' not in st.session_state:
     st.session_state.show_tracks = False
+if 'show_genres' not in st.session_state:
+    st.session_state.show_genres = False
 
 # Toggle buttons
 if st.button('top tracks'):
