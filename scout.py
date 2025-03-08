@@ -6,9 +6,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sb
 
-CLIENT_ID = os.environ.get('CLIENT_ID')
-CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
-REDIRECT_URI = 'http://localhost:8000/callback'
+CLIENT_ID = os.environ.get('SPOTIPY_CLIENT_ID')
+CLIENT_SECRET = os.environ.get('SPOTIPY_CLIENT_SECRET')
+# REDIRECT_URI = 'http://localhost:8000/callback'
+REDIRECT_URI = os.environ.get('SPOTIPY_REDIRECT_URI')
 
 sp = spotipy.Spotify(
     auth_manager=SpotifyOAuth(
