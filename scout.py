@@ -4,6 +4,7 @@ from spotipy.oauth2 import SpotifyOAuth
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sb
 
 CLIENT_ID = os.environ.get('CLIENT_ID')
 CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
@@ -70,10 +71,17 @@ if st.session_state.show_genres:
     
     # Create a pie chart of the top genres
     fig, ax = plt.subplots()
-    ax.pie(genre_counts, labels=genre_counts.index,
-           autopct='%1.1f%%', startangle=90)
-    # Equal aspect ratio ensures that pie is drawn as a circle.
+    fig.patch.set_facecolor('none')
+    wedges, texts, autotexts = ax.pie(genre_counts, labels=genre_counts.index, autopct='%1.1f%%',
+                                      startangle=90, colors=sb.color_palette('viridis', len(genre_counts)))
     ax.axis('equal')
+    ax.set_title('Top Genres')
+    
+    # text color to white
+    for text in texts:
+        text.set_color('white')
+    for autotext in autotexts:
+        autotext.set_color('white')
 
     st.subheader('top genres')
     st.pyplot(fig)
