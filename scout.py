@@ -14,7 +14,7 @@ sp = spotipy.Spotify(
         client_id=CLIENT_ID,
         client_secret=CLIENT_SECRET,
         redirect_uri=REDIRECT_URI,
-        scope='user-top-read user-read-private'
+        scope='user-top-read user-read-private user-read-recently-played'
     )
 )
 
@@ -26,12 +26,16 @@ if 'show_tracks' not in st.session_state:
     st.session_state.show_tracks = False
 if 'show_genres' not in st.session_state:
     st.session_state.show_genres = False
+if 'show_recently_played' not in st.session_state:
+    st.session_state.show_recently_played = False
 
 # Toggle buttons
 if st.button('top tracks'):
     st.session_state.show_tracks = not st.session_state.show_tracks
 if st.button('top genres'):
     st.session_state.show_genres = not st.session_state.show_genres
+if st.button('recently played'):
+    st.session_state.show_recently_played = not st.session_state.show_recently_played
 
 # top tracks
 if st.session_state.show_tracks:
@@ -71,9 +75,26 @@ if st.session_state.show_genres:
     # Equal aspect ratio ensures that pie is drawn as a circle.
     ax.axis('equal')
 
-    st.subheader('Top Genres')
+    st.subheader('top genres')
     st.pyplot(fig)
 
+# recently played
+if st.session_state.show_recently_played:
+    recently_played = sp.current_user_recently_played(limit=50)
+    track_names = [item['track']['name'] for item in recently_played['items']]
+    artists = [item['track']['artists'][0]['name'] for item in recently_played['items']]
+    played_at = [item['played_at'] for item in recently_played['items']]
+    track_urls = [item['track']['external_urls']['spotify'] for item in recently_played['items']]
+    
+    # dataframe for recently played songs
+    df_recently_played = pd.DataFrame({
+        'track_name': [f"[{name}]({url})" for name, url in zip(track_names, track_urls)],
+        'artist': artists,
+        'time': played_at
+    })
+    df_recently_played['time'] = pd.to_datetime(df_recently_played['time'])
+    df_recently_played.set_index('time', inplace=True)
 
-
+    st.subheader("recently played")
+    st.markdown(df_recently_played.to_markdown(), unsafe_allow_html=True)
 
