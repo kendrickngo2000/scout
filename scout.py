@@ -104,5 +104,5 @@ if st.session_state.show_recently_played:
     df_recently_played.set_index('time', inplace=True)
 
     st.subheader("recently played")
-    st.markdown(df_recently_played.to_markdown(), unsafe_allow_html=True)
+    st.markdown(df_recently_played.to_html(escape=False), unsafe_allow_html=True)
 
