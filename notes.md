@@ -11,3 +11,5 @@
 + starting to fix spotipy oauth
     - first by changing localhost from 8000 to streamlit's 8501
 + remember that when deploying, you need to change localhost to a public url
+### 11:22pm
++ spotipy oauth now works, but giving spotipy.SpotifyExceptions error when user clicks button

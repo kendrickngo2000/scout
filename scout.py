@@ -21,10 +21,17 @@ if not CLIENT_ID or not CLIENT_SECRET or not REDIRECT_URI:
 # initialize session state
 if 'token_info' not in st.session_state:
     st.session_state.token_info = None
+if 'auth_manger' not in st.session_state:
+    st.session_state.auth_manager = None
 
 # create spotify client
 def get_spotify_client(token_info):
-    return spotipy.Spotify(auth=token_info['access_token'])
+    if st.session_state.token_info is None:
+        return None
+    # check if token is expired and refresh if needed
+    if st.session_state.auth_manager.is_token_expired(st.session_state.token_info):
+        st.session_state.token_info = st.session_state.auth_manager.refresh_access_token(st.session_state.token_info['refresh_token'])
+    return spotipy.Spotify(auth=st.session_state.token_info['access_token'])
 
 def show_login_page():
     st.title("scout")
@@ -37,6 +44,7 @@ def show_login_page():
         scope='user-top-read user-read-private user-read-recently-played',
         cache_path=None
     )
+    st.session_state.auth_manager = auth_manager
 
     # check if redirected with a code
     query_params = st.query_params
