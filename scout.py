@@ -13,6 +13,11 @@ CLIENT_ID = os.environ.get('SPOTIPY_CLIENT_ID')
 CLIENT_SECRET = os.environ.get('SPOTIPY_CLIENT_SECRET')
 REDIRECT_URI = os.environ.get('SPOTIPY_REDIRECT_URI')
 
+if not CLIENT_ID or not CLIENT_SECRET or not REDIRECT_URI:
+    st.error(
+        "Missing Spotify credentials. Check your environment variables or secrets.")
+    st.stop()
+
 # initialize session state
 if 'token_info' not in st.session_state:
     st.session_state.token_info = None
