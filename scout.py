@@ -37,8 +37,7 @@ def show_login_page():
 
     if auth_code:
         try:
-            token_info = auth_manager.get_access_token(
-                auth_code, check_cache=False)
+            token_info = auth_manager.get_access_token(auth_code, check_cache=False)
             st.session_state.token_info = token_info
             st.query_params.clear()  # Clear query params after use
             st.rerun()  # Rerun to switch to main page
@@ -139,6 +138,7 @@ def show_main_page():
         st.subheader("recently played")
         st.markdown(df_recently_played.to_html(escape=False), unsafe_allow_html=True)
 
+# page routing
 if st.session_state.token_info is None:
     show_login_page()
 else:

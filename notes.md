@@ -6,3 +6,7 @@
 + spotify oauth login is not working
 + tried deleting .cache files but still
 + streamlit error: using localhost as redirect_uri does not work
+
+## tues, march 11
++ starting to fix spotipy oauth
+    - first by changing localhost from 8000 to streamlit's 8501
