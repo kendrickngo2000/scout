@@ -1,12 +1,14 @@
 import os
+from dotenv import load_dotenv
+from urllib.parse import urlencode
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sb
-from urllib.parse import urlencode
 
+load_dotenv()
 CLIENT_ID = os.environ.get('SPOTIPY_CLIENT_ID')
 CLIENT_SECRET = os.environ.get('SPOTIPY_CLIENT_SECRET')
 REDIRECT_URI = os.environ.get('SPOTIPY_REDIRECT_URI')
