@@ -21,7 +21,7 @@ if not CLIENT_ID or not CLIENT_SECRET or not REDIRECT_URI:
 # initialize session state
 if 'token_info' not in st.session_state:
     st.session_state.token_info = None
-if 'auth_manger' not in st.session_state:
+if 'auth_manager' not in st.session_state:
     st.session_state.auth_manager = None
 
 # create spotify client
