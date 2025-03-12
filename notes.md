@@ -10,3 +10,4 @@
 ## tues, march 11
 + starting to fix spotipy oauth
     - first by changing localhost from 8000 to streamlit's 8501
++ remember that when deploying, you need to change localhost to a public url
