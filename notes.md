@@ -13,3 +13,14 @@
 + remember that when deploying, you need to change localhost to a public url
 ### 11:22pm
 + spotipy oauth now works, but giving spotipy.SpotifyExceptions error when user clicks button
+### 11:35
++ should work now cause im a god
+
+
+## fri, march 14
++ met with bruce, new deadline about 2 weeks
++ new requirements: 
+    + converting to karaoke app 
+    + lyrics, spotify player
+    + maybe migrate to a next.js app
+    + needs to be deployed, maybe heroku
