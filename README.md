@@ -16,3 +16,5 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## notes
 + migration to next.js from streamlit
+- The 401 Unauthorized response from curl suggests getServerSession isn’t returning a valid session with an accessToken.
+    - probably bc testing with standalone curl doesn't carry the session context. Expected
