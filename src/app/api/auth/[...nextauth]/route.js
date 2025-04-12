@@ -15,9 +15,11 @@ export const authOptions = {
             'playlist-modify-public',
             'user-top-read',
             'user-read-recently-played',
-            'streaming' // Essential for Web Playback SDK
+            'streaming',
+            'user-read-playback-state',
+            'user-modify-playback-state',
           ].join(' '),
-          show_dialog: true // Helps with debugging auth flow
+          show_dialog: true
         }
       }
     }),
@@ -25,21 +27,49 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     async jwt({ token, account }) {
-      if(account) {
+      if (account) {
         token.accessToken = account.access_token;
-        token.accessToken = account.refresh_token;
-        token.expiresAt = account.expires_at;
+        token.refreshToken = account.refresh_token;
+        token.expiresAt = account.expires_at * 1000; // Convert to milliseconds
       }
+
+      // Refresh the token if it has expired
+      if (Date.now() > token.expiresAt) {
+        try {
+          const url = "https://accounts.spotify.com/api/token";
+          const response = await fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              Authorization: `Basic ${Buffer.from(
+                `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
+              ).toString("base64")}`,
+            },
+            body: new URLSearchParams({
+              grant_type: "refresh_token",
+              refresh_token: token.refreshToken,
+            }),
+          });
+
+          const refreshedTokens = await response.json();
+          if (!response.ok) throw refreshedTokens;
+
+          token.accessToken = refreshedTokens.access_token;
+          token.expiresAt = Date.now() + refreshedTokens.expires_in * 1000;
+        } catch (error) {
+          console.error("Error refreshing access token:", error);
+          return { ...token, error: "RefreshAccessTokenError" };
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
       session.accessToken = token.accessToken;
       session.refreshToken = token.refreshToken;
       session.expiresAt = token.expiresAt;
+      return session;
     },
-    async redirect({ session, token }) {
-      // refirect to homepage after login
-    }
   },
 };
 

@@ -1,7 +1,7 @@
 "use client";
-import { signIn, useSession } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
-// import axios from "axios";
+import axios from "axios";
 
 export default function Page() {
   const { data: session } = useSession();
@@ -132,6 +132,13 @@ export default function Page() {
   return (
     <main className="flex flex-col min-h-screen bg-black text-white p-8">
       <h1 className="text-3xl font-bold mb-4">scout</h1>
+
+      <button
+        onClick={() => signOut()}
+        className="mb-4 px-4 py-2 bg-red-500 hover:bg-red-400 text-white font-semibold rounded"
+      >
+        sign out
+      </button>
       
       {error && (
         <div className="mb-4 p-2 bg-red-500 text-white rounded">
