@@ -3,6 +3,14 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
+export function DebugLogout() {
+  return (
+    <button onClick={() => signOut({ callbackUrl: '/' })}>
+      Sign Out
+    </button>
+  );
+}
+
 export default function Page() {
   const { data: session } = useSession();
   const [player, setPlayer] = useState(null);
@@ -107,13 +115,29 @@ export default function Page() {
     }
   };
 
-  const playTrack = (trackUri) => {
-    if (!player || !deviceId || !trackUri) return;
-    
-    player.play({ device_id: deviceId, uris: [trackUri] }).catch(error => {
-      setError(`Play Error: ${error.message}`);
-    });
-  };
+const playTrack = async (trackUri) => {
+  if (!deviceId || !trackUri || !session?.accessToken) return;
+
+  try {
+    await axios.put(
+      'https://api.spotify.com/v1/me/player/play',
+      {
+        uris: [trackUri],
+      },
+      {
+        headers: {
+          Authorization: 'Bearer ${session.accesToken',
+          'Content-Type': 'application/json',
+        },
+        params: {
+          device_id: deviceIdm,
+        },
+      }
+    );
+  } catch (error) {
+    setError('Play Error: ${error.response?.data?.error?.message || error.message}');
+  }
+};
 
   if (!session) {
     return (
