@@ -45,6 +45,14 @@ export default function Page() {
           setDeviceId(device_id);
           setPlayer(newPlayer);
           fetchPlaylists(); // Fetch playlists after player is ready
+          axios
+          .put(
+            'https://api.spotify.com/v1/me/player',
+            { device_ids: [device_id], play: true },
+            { headers: { Authorization: `Bearer ${session.accessToken}` } }
+          )
+            .then(() => console.log('Playback transferred to Web Player'))
+            .catch((err) => console.error('Transfer playback error:', err));
         });
 
         newPlayer.addListener('not_ready', ({ device_id }) => {
@@ -116,28 +124,29 @@ export default function Page() {
   };
 
 const playTrack = async (trackUri) => {
-  if (!deviceId || !trackUri || !session?.accessToken) return;
+  if (!deviceId || !trackUri || !session?.accessToken) {
+    console.error("Missing required parameters:", { deviceId, trackUri, accessToken: !!session?.accessToken });
+    return;
+  }
 
   try {
-    await axios.put(
-      'https://api.spotify.com/v1/me/player/play',
-      {
-        uris: [trackUri],
-      },
+    const response = await axios.put(
+      `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
+      { uris: [trackUri] },
       {
         headers: {
           Authorization: `Bearer ${session.accessToken}`,
           'Content-Type': 'application/json',
         },
-        params: {
-          device_id: deviceId,
-        },
       }
     );
+    console.log("Play response:", response.status); // Should log 204 if successful
   } catch (error) {
-    setError(`Play Error: ${error.response?.data?.error?.message || error.message}`); 
+    setError(`Play Error: ${error.response?.data?.error?.message || error.message}`);
+    console.error("Full error:", error);
   }
 };
+
 
   if (!session) {
     return (
