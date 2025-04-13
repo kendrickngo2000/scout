@@ -10,7 +10,9 @@ export const authOptions = {
         params: {
           scope: [
             'user-read-email',
+            'user-read-private',
             'playlist-read-private',
+            'playlist-read-collaborative',
             'playlist-modify-private',
             'playlist-modify-public',
             'user-top-read',
