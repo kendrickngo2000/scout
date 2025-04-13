@@ -126,16 +126,16 @@ const playTrack = async (trackUri) => {
       },
       {
         headers: {
-          Authorization: 'Bearer ${session.accesToken',
+          Authorization: `Bearer ${session.accessToken}`,
           'Content-Type': 'application/json',
         },
         params: {
-          device_id: deviceIdm,
+          device_id: deviceId,
         },
       }
     );
   } catch (error) {
-    setError('Play Error: ${error.response?.data?.error?.message || error.message}');
+    setError(`Play Error: ${error.response?.data?.error?.message || error.message}`); 
   }
 };
 
@@ -206,7 +206,8 @@ const playTrack = async (trackUri) => {
             <p>Loading tracks...</p>
           ) : playlistTracks.length > 0 ? (
             <ul>
-              {playlistTracks.map((trackObject) => (
+            {playlistTracks.map((trackObject) => (
+              trackObject.track ? ( // Ensure trackObject.track exists
                 <li key={trackObject.track.id} className="flex items-center justify-between py-1">
                   <span>{trackObject.track.name}</span>
                   <button
@@ -216,7 +217,8 @@ const playTrack = async (trackUri) => {
                     Play
                   </button>
                 </li>
-              ))}
+              ) : null // Skip rendering if trackObject.track is null
+            ))}
             </ul>
           ) : (
             <p>No tracks found in this playlist.</p>
