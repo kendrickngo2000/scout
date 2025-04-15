@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import axios from "axios";
 
@@ -7,26 +7,37 @@ export default function NowPlaying({ track, onClose }) {
   const [lyrics, setLyrics] = useState([]);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const lyricsContainerRef = useRef(null);
 
   useEffect(() => {
     const fetchLyrics = async () => {
       if (!track?.id || !session?.accessToken) return;
+
       try {
         const response = await axios.get(
-          `/api/lyrics?trackId=${track.id}&accessToken=${session.accessToken}`
-        );
+          `/api/lyrics?trackId=${track.id}&accessToken=${session.accessToken}`);
         setLyrics(response.data.lyrics);
       } catch (error) {
         console.error("Error fetching lyrics:", error);
       }
     };
-
     fetchLyrics();
-  }, [track, session]);
+  }, [track]);
 
-  const handleTimeUpdate = (time) => {
-    setCurrentTime(time);
-  };
+  useEffect(() => {
+    if (!window.player) return;
+
+    const interval = setInterval(async () => {
+      const state = await window.player.getCurrentState();
+      if (state && !state.paused) {
+        const position = state.position / 1000;
+        setCurrentTime(position);
+        setDuration(state.duration / 1000);
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSeek = (event) => {
     const newTime = (event.target.value / 100) * duration;
@@ -40,7 +51,7 @@ export default function NowPlaying({ track, onClose }) {
 
   return (
     <div className="flex h-screen">
-      {/* Left Side */}
+      {/* Left Panel: Album + Info */}
       <div className="w-1/4 bg-gray-900 text-white flex flex-col items-center p-4">
         <img
           src={track.album.images[0]?.url}
@@ -67,20 +78,30 @@ export default function NowPlaying({ track, onClose }) {
         </button>
       </div>
 
-      {/* Right Side */}
-      <div className="w-3/4 bg-black text-white p-8 overflow-y-auto">
+      {/* Right Panel: Lyrics */}
+      <div
+        ref={lyricsContainerRef}
+        className="w-3/4 bg-black text-white p-8 overflow-y-auto"
+      >
         <h3 className="text-lg font-bold mb-4">Lyrics</h3>
         <div>
-          {lyrics.map((line, index) => (
-            <p
-              key={index}
-              className={`mb-2 ${
-                currentTime >= line.time ? "text-green-500" : "text-gray-400"
-              }`}
-            >
-              {line.text}
-            </p>
-          ))}
+          {lyrics.map((line, index) => {
+            const nextLine = lyrics[index + 1];
+            const isCurrent =
+              currentTime >= line.time &&
+              (!nextLine || currentTime < nextLine.time);
+
+            return (
+              <p
+                key={index}
+                className={`mb-2 transition-colors duration-200 ${
+                  isCurrent ? "text-green-500 font-bold" : "text-gray-400"
+                }`}
+              >
+                {line.text}
+              </p>
+            );
+          })}
         </div>
       </div>
     </div>
