@@ -2,6 +2,7 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import NowPlaying from "../components/NowPlaying";
 
 export function DebugLogout() {
   return (
@@ -21,6 +22,7 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const scriptLoaded = useRef(false);
+  const [nowPlayingTrack, setNowPlayingTrack] = useState(null);
 
   useEffect(() => {
     if (session?.accessToken && !scriptLoaded.current) {
@@ -123,33 +125,42 @@ export default function Page() {
     }
   };
 
-const playTrack = async (trackUri) => {
-  if (!deviceId || !trackUri || !session?.accessToken) {
-    console.error("Missing required parameters:", { deviceId, trackUri, accessToken: !!session?.accessToken });
-    return;
-  }
+  const playTrack = async (trackUri, track) => {
+    if (!deviceId || !trackUri || !session?.accessToken) {
+      console.error("Missing required parameters:", { deviceId, trackUri, accessToken: !!session?.accessToken });
+      return;
+    }
 
-  try {
-    console.log("Attempting to play:", trackUri);
-    console.log("On device:", deviceId);
+    try {
+      console.log("Attempting to play:", trackUri);
+      console.log("On device:", deviceId);
 
-    const response = await axios.put(
-      `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
-      { uris: [trackUri] },
-      {
-        headers: {
-          Authorization: `Bearer ${session.accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      }
+      const response = await axios.put(
+        `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
+        { uris: [trackUri] },
+        {
+          headers: {
+            Authorization: `Bearer ${session.accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      console.log("Play response:", response.status); // Should log 204 if successful
+      setNowPlayingTrack(track);
+    } catch (error) {
+      setError(`Play Error: ${error.response?.data?.error?.message || error.message}`);
+      console.error("Full error:", error);
+    }
+  };
+
+  if (nowPlayingTrack) {
+    return (
+      <NowPlaying
+        track={nowPlayingTrack}
+        onClose={() => setNowPlayingTrack(null)}
+      />
     );
-    console.log("Play response:", response.status); // Should log 204 if successful
-  } catch (error) {
-    setError(`Play Error: ${error.response?.data?.error?.message || error.message}`);
-    console.error("Full error:", error);
   }
-};
-
 
   if (!session) {
     return (
@@ -224,7 +235,7 @@ const playTrack = async (trackUri) => {
                   <span>{trackObject.track.name}</span>
                   <button
                     className="px-2 py-1 bg-green-500 hover:bg-green-400 text-black rounded-full text-sm"
-                    onClick={() => playTrack(trackObject.track.uri)}
+                    onClick={() => playTrack(trackObject.track.uri, trackObject.track)}
                   >
                     Play
                   </button>
