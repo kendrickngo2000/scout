@@ -130,6 +130,9 @@ const playTrack = async (trackUri) => {
   }
 
   try {
+    console.log("Attempting to play:", trackUri);
+    console.log("On device:", deviceId);
+
     const response = await axios.put(
       `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
       { uris: [trackUri] },
