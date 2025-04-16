@@ -27,17 +27,29 @@ export default function NowPlaying({ track, onClose }) {
   useEffect(() => {
     if (!window.player) return;
 
-    const interval = setInterval(async () => {
-      const state = await window.player.getCurrentState();
-      if (state && !state.paused) {
-        const position = state.position / 1000;
-        setCurrentTime(position);
-        setDuration(state.duration / 1000);
-      }
-    }, 500);
+    const interval = setInterval(() => {
+      window.player.getCurrentState().then((state) => {
+        if (state && !state.paused) {
+          setCurrentTime(state.position / 1000);
+          setDuration(state.duration / 1000);
+        }
+      });
+    }, 300); // try slightly longer interval to reduce CPU
 
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+  const container = lyricsContainerRef.current;
+  const activeLine = container?.querySelector(".current-line");
+
+  if (activeLine && container) {
+    container.scrollTo({
+      top: activeLine.offsetTop - container.offsetHeight / 2,
+      behavior: "smooth",
+    });
+  }
+}, [currentTime]);
 
   const handleSeek = (event) => {
     const newTime = (event.target.value / 100) * duration;
@@ -61,7 +73,7 @@ export default function NowPlaying({ track, onClose }) {
         <h2 className="text-xl font-bold">{track.name}</h2>
         <p className="text-sm text-gray-400">
           {track.artists.map((a) => a.name).join(", ")}
-        </p>
+        .</p>
         <input
           type="range"
           min="0"
@@ -94,9 +106,7 @@ export default function NowPlaying({ track, onClose }) {
             return (
               <p
                 key={index}
-                className={`mb-2 transition-colors duration-200 ${
-                  isCurrent ? "text-green-500 font-bold" : "text-gray-400"
-                }`}
+                className={`mb-2 transition-colors duration-200 ${isCurrent ? "text-green-500 font-bold current-line" : "text-gray-400"}`}
               >
                 {line.text}
               </p>
