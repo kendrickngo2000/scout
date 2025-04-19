@@ -1,4 +1,4 @@
-// app/api/lyrics/route.js
+// app/api/lyrics/lyrics.js
 
 // Helper: Get track info from Spotify
 async function getTrackInfo(trackId, accessToken) {
@@ -28,17 +28,18 @@ export async function GET(req) {
   }
 
   try {
-    // Step 1: Get track name and artist
+    // Get track name and artist
     const trackInfo = await getTrackInfo(trackId, accessToken);
     const artist = trackInfo.artists[0]?.name;
     const title = trackInfo.name;
+    console.log("Fetched track info:", { artist, title });
 
-    // Step 2: Fetch lyrics
+    // fetch lyrics
     const lyricsText = await fetch(`https://api.lyrics.ovh/v1/${artist}/${title}`)
       .then((res) => res.json())
       .then((data) => data.lyrics);
 
-    // Step 3: Convert to array (basic line-by-line for demo purposes)
+    // convert to array (basic line-by-line for demo purposes)
     const lyrics = lyricsText
       .split("\n")
       .filter(Boolean)

@@ -51,6 +51,10 @@ export default function NowPlaying({ track, onClose }) {
   }
 }, [currentTime]);
 
+  useEffect(() => {
+    console.log("lyrics loaded", lyrics);
+  }, [lyrics]);
+
   const handleSeek = (event) => {
     const newTime = (event.target.value / 100) * duration;
     setCurrentTime(newTime);
@@ -104,12 +108,14 @@ export default function NowPlaying({ track, onClose }) {
               (!nextLine || currentTime < nextLine.time);
 
             return (
-              <p
-                key={index}
-                className={`mb-2 transition-colors duration-200 ${isCurrent ? "text-green-500 font-bold current-line" : "text-gray-400"}`}
-              >
-                {line.text}
-              </p>
+            <p
+              key={index}
+              className={`mb-2 transition-colors duration-200 ${
+                isCurrent ? "text-green-500 font-bold current-line" : "text-gray-400"
+              }`}
+            >
+              {line.text}
+            </p>
             );
           })}
         </div>
