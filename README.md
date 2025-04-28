@@ -21,7 +21,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
     - probably bc testing with standalone curl doesn't carry the session context. Expected
 
 
-References:L
+References:
 https://next-auth.js.org/configuration/nextjs
 https://dev.to/matdweb/how-to-authenticate-a-spotify-user-in-nextjs-14-using-nextauth-5f6i
 https://evannotfound.com/blog/tutorial-setup-and-use-nextauthjs-in-nextjs-13-app-directory

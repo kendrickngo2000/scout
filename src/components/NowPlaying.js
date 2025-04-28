@@ -14,8 +14,7 @@ export default function NowPlaying({ track, onClose }) {
       if (!track?.id || !session?.accessToken) return;
 
       try {
-        const response = await axios.get(
-          `/api/lyrics?trackId=${track.id}&accessToken=${session.accessToken}`);
+        const response = await axios.get(`/api/nowPlaying?title=${encodeURIComponent(track.name)}&artist=${encodeURIComponent(track.artists[0].name)}`);
         setLyrics(response.data.lyrics);
       } catch (error) {
         console.error("Error fetching lyrics:", error);
