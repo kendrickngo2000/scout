@@ -177,12 +177,12 @@ export default function Page() {
   }
 
   return (
-    <main className="flex flex-col min-h-screen bg-black text-white p-8">
+    <main className="relative flex flex-col min-h-screen bg-black text-white p-8">
       <h1 className="text-3xl font-bold mb-4">scout</h1>
 
       <button
         onClick={() => signOut()}
-        className="mb-4 px-4 py-2 bg-red-500 hover:bg-red-400 text-white font-semibold rounded"
+        className="absolute top-4 right-4 px-2 py-1 bg-red-500 hover:bg-red-400 text-white font-semibold rounded text-sm"
       >
         sign out
       </button>
@@ -198,24 +198,26 @@ export default function Page() {
       ) : (
         <p className="mb-4">Loading Spotify Player...</p>
       )}
-
+      
+      // playlists layout
       <h2 className="text-xl font-semibold mb-2">Your Playlists</h2>
       {loading ? (
         <p>Loading...</p>
       ) : playlists.length > 0 ? (
-        <ul className="mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
           {playlists.map((playlist) => (
-            <li
+            <div
               key={playlist.id}
-              className={`cursor-pointer hover:underline ${
-                selectedPlaylistId === playlist.id ? 'text-green-500' : ''
+              className={`p-4 border rounded-lg cursor-pointer hover:bg-gray-800 ${
+                selectedPlaylistId === playlist.id ? 'border-green-500' : 'border-gray-700'
               }`}
               onClick={() => handlePlaylistSelect(playlist.id)}
             >
-              {playlist.name}
-            </li>
+              <h3 className="text-lg font-semibold">{playlist.name}</h3>
+              <p className="text-sm text-gray-400">{playlist.tracks.total} tracks</p>
+            </div>
           ))}
-        </ul>
+        </div>
       ) : (
         <p>No playlists found.</p>
       )}
