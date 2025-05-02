@@ -10,6 +10,8 @@ Open [http://localhost:3000](http://localhost:3000) with your browser.
 
 ## notes
 + migration to next.js from streamlit
++ fix media controls
++ fix deployment on different branch
 
 ## References
 + https://next-auth.js.org/configuration/nextjs
