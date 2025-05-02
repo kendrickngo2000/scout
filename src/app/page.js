@@ -3,6 +3,8 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import NowPlaying from "../components/NowPlaying";
+import { Pie } from "react-chartjs-2"; 
+import Chart from "chart.js/auto";
 
 export function DebugLogout() {
   return (
@@ -11,6 +13,149 @@ export function DebugLogout() {
     </button>
   );
 }
+
+// Spotify Insights Section
+function SpotifyInsights() {
+  const [view, setView] = useState(null); // 'tracks', 'genres', 'recent'
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchData = async (type) => {
+    setLoading(true);
+    setError(null);
+    setView(type);
+
+    try {
+      const res = await fetch(`/api/spotify/${type}`);
+      const json = await res.json();
+
+      if (!json.items || !Array.isArray(json.items) || json.items.length === 0) {
+        setError("No data found for the selected category.");
+        setData(null);
+      } else {
+        setData(json);
+      }
+    } catch (err) {
+      console.error("Fetch Error:", err);
+      setError("Failed to fetch data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderContent = () => {
+    if (!view) return null;
+    if (loading) return <p>Loading {view}...</p>;
+    if (error) return <p className="text-red-500">{error}</p>;
+
+    const items = data?.items || [];
+
+    if (view === "top-songs") {
+      return (
+        <div>
+          <h3 className="text-xl font-semibold mb-2">Your Top Tracks</h3>
+          <ul className="space-y-1">
+            {items.map((track) => (
+              <li key={track.id}>
+                <a
+                  href={track.external_urls.spotify}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline text-green-400"
+                >
+                  {track.name} – {track.artists[0].name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
+
+    if (view === "top-genres") {
+      const genreCounts = {};
+      data.items.forEach((artist) => {
+        artist.genres.forEach((genre) => {
+          genreCounts[genre] = (genreCounts[genre] || 0) + 1;
+        });
+      });
+
+      const chartData = {
+        labels: Object.keys(genreCounts),
+        datasets: [
+          {
+            data: Object.values(genreCounts),
+            backgroundColor: Object.keys(genreCounts).map(
+              (_, i) => `hsl(${i * 30}, 70%, 50%)`
+            ),
+          },
+        ],
+      };
+
+      return (
+        <div className="max-w-md">
+          <h3 className="text-xl font-semibold mb-2">Your Favorite Genres</h3>
+          <Pie data={chartData} />
+        </div>
+      );
+    }
+
+    if (view === "recently-played") {
+      return (
+        <div>
+          <h3 className="text-xl font-semibold mb-2">Recently Played</h3>
+          <ul className="space-y-1">
+            {data.items
+              .filter((item) => item.track && item.track.external_urls?.spotify)
+              .map((item, idx) => (
+                <li key={idx}>
+                  <a
+                    href={item.track.external_urls.spotify}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline text-blue-400"
+                  >
+                    {item.track.name} – {item.track.artists[0].name}
+                  </a>
+                </li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <section className="mt-20 border-t border-gray-700 pt-10">
+      <h2 className="text-2xl font-bold mb-4">Spotify Insights</h2>
+      <div className="space-x-4 mb-6">
+        <button
+          className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded"
+          onClick={() => fetchData("top-songs")}
+        >
+          Favorite Tracks
+        </button>
+        <button
+          className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded"
+          onClick={() => fetchData("top-genres")}
+        >
+          Favorite Genres
+        </button>
+        <button
+          className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded"
+          onClick={() => fetchData("recently-played")}
+        >
+          Recently Played
+        </button>
+      </div>
+      <div>{renderContent()}</div>
+    </section>
+  );
+}
+
 
 export default function Page() {
   const { data: session } = useSession();
@@ -26,7 +171,6 @@ export default function Page() {
 
   useEffect(() => {
     if (session?.accessToken && !scriptLoaded.current) {
-      // Load Spotify Web Playback SDK script
       const script = document.createElement('script');
       script.src = 'https://sdk.scdn.co/spotify-player.js';
       script.async = true;
@@ -41,18 +185,17 @@ export default function Page() {
           volume: 0.5,
         });
 
-        // Event handlers
         newPlayer.addListener('ready', ({ device_id }) => {
           console.log('Ready with Device ID', device_id);
           setDeviceId(device_id);
           setPlayer(newPlayer);
-          fetchPlaylists(); // Fetch playlists after player is ready
+          fetchPlaylists();
           axios
-          .put(
-            'https://api.spotify.com/v1/me/player',
-            { device_ids: [device_id], play: true },
-            { headers: { Authorization: `Bearer ${session.accessToken}` } }
-          )
+            .put(
+              'https://api.spotify.com/v1/me/player',
+              { device_ids: [device_id], play: true },
+              { headers: { Authorization: `Bearer ${session.accessToken}` } }
+            )
             .then(() => console.log('Playback transferred to Web Player'))
             .catch((err) => console.error('Transfer playback error:', err));
         });
@@ -77,7 +220,6 @@ export default function Page() {
           setError(`Player Connect Error: ${error}`);
         });
 
-        // Store player for cleanup
         setPlayer(newPlayer);
       };
     }
@@ -92,11 +234,19 @@ export default function Page() {
   const fetchPlaylists = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('https://api.spotify.com/v1/me/playlists', {
-        headers: { Authorization: `Bearer ${session.accessToken}` }
+      const res = await axios.get("https://api.spotify.com/v1/me/playlists", {
+        headers: { Authorization: `Bearer ${session.accessToken}` },
       });
-      setPlaylists(response.data.items);
+
+      console.log("🎧 Playlist API response:", res.data);
+
+      if (!res.data || !res.data.items) {
+        console.warn("No playlist items returned:", res.data);
+      }
+
+      setPlaylists(res.data.items);
     } catch (error) {
+      console.error("Error fetching playlists:", error.response?.data || error.message);
       setError(`Error fetching playlists: ${error.message}`);
     } finally {
       setLoading(false);
@@ -145,7 +295,7 @@ export default function Page() {
           },
         }
       );
-      console.log("Play response:", response.status); // Should log 204 if successful
+      console.log("Play response:", response.status);
       setNowPlayingTrack(track);
     } catch (error) {
       setError(`Play Error: ${error.response?.data?.error?.message || error.message}`);
@@ -199,7 +349,6 @@ export default function Page() {
         <p className="mb-4">Loading Spotify Player...</p>
       )}
       
-      // playlists layout
       <h2 className="text-xl font-semibold mb-2">Your Playlists</h2>
       {loading ? (
         <p>Loading...</p>
@@ -232,7 +381,7 @@ export default function Page() {
           ) : playlistTracks.length > 0 ? (
             <ul>
             {playlistTracks.map((trackObject) => (
-              trackObject.track ? ( // Ensure trackObject.track exists
+              trackObject.track ? (
                 <li key={trackObject.track.id} className="flex items-center justify-between py-1">
                   <span>{trackObject.track.name}</span>
                   <button
@@ -242,7 +391,7 @@ export default function Page() {
                     Play
                   </button>
                 </li>
-              ) : null // Skip rendering if trackObject.track is null
+              ) : null
             ))}
             </ul>
           ) : (
@@ -250,6 +399,7 @@ export default function Page() {
           )}
         </div>
       )}
+      <SpotifyInsights />
     </main>
   );
 }

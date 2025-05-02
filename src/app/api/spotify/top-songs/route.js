@@ -1,18 +1,65 @@
+// // File: src/app/api/spotify/top-songs/route.js
+// import { getServerSession } from "next-auth";
+// import { authOptions } from "../../auth/[...nextauth]/route";
+// import { NextResponse } from "next/server";
+
+// export const GET = async () => {
+//   try {
+//     const session = await getServerSession(authOptions);
+//     if (!session || !session.user?.accessToken) {
+//       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+//     }
+
+//     const endpoint = "https://api.spotify.com/v1/me/top/tracks?time_range=medium_term&limit=10";
+
+//     const res = await fetch(endpoint, {
+//       headers: {
+//         Authorization: `Bearer ${session.user.accessToken}`,
+//         "Content-Type": "application/json",
+//       },
+//     });
+
+//     if (!res.ok) {
+//       const errText = await res.text();
+//       return NextResponse.json({ error: "Spotify API error", details: errText }, { status: res.status });
+//     }
+
+//     const data = await res.json();
+//     return NextResponse.json({ items: data.items || [] });
+//   } catch (err) {
+//     return NextResponse.json({ error: "Server error", details: err.message }, { status: 500 });
+//   }
+// };
+
+
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 
-export const GET = async (req) => {
-  const session = await getServerSession(authOptions); // No req needed in App Router
-  if (!session || !session.accessToken) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export const GET = async () => {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.accessToken) {
+      console.error("No access token");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  const response = await fetch("https://api.spotify.com/v1/me/top/tracks", {
-    headers: {
-      Authorization: `Bearer ${session.accessToken}`,
-    },
-  });
-  const data = await response.json();
-  return NextResponse.json(data);
+    const url = "https://api.spotify.com/v1/me/top/tracks?time_range=medium_term&limit=10";
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${session.accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      return NextResponse.json({ error: "Spotify API error", details: data }, { status: res.status });
+    }
+
+    return NextResponse.json({ items: data.items || [] });
+  } catch (err) {
+    console.error("Server error:", err);
+    return NextResponse.json({ error: "Server error", details: err.message }, { status: 500 });
+  }
 };
