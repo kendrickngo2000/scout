@@ -7,6 +7,7 @@ import { Pie } from "react-chartjs-2";
 import Chart from "chart.js/auto";
 import { Bar } from "react-chartjs-2";
 
+// debug logout
 export function DebugLogout() {
   return (
     <button onClick={() => signOut({ callbackUrl: '/' })}>
@@ -21,7 +22,27 @@ function SpotifyInsights() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [recentTracks, setRecentTracks] = useState([]);
 
+  // recently played state
+  useEffect(() => {
+  if (view === "recently-played") {
+    fetch("/api/spotify/recently-played")
+      .then(async (res) => {
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(`Error ${res.status}: ${errorText}`);
+        }
+        return res.json();
+      })
+      .then((data) => setRecentTracks(data.items || []))
+      .catch((err) => {
+        console.error("Failed to load recently played:", err.message);
+      });
+  }
+}, [view]);
+
+  // error handling for fetching data
   const fetchData = async (type) => {
     setLoading(true);
     setError(null);
@@ -45,6 +66,7 @@ function SpotifyInsights() {
     }
   };
 
+  // render content
   const renderContent = () => {
     if (!view) return null;
     if (loading) return <p>Loading {view}...</p>;
@@ -52,6 +74,7 @@ function SpotifyInsights() {
 
     const items = data?.items || [];
 
+    // top songs view
     if (view === "top-songs") {
       const chartData = {
         labels: items.map((track) => track.name),
@@ -89,6 +112,7 @@ function SpotifyInsights() {
       );
     }
 
+    // top genres view
     if (view === "top-genres") {
       const genreCounts = {};
       data.items.forEach((artist) => {
@@ -117,29 +141,46 @@ function SpotifyInsights() {
       );
     }
 
+    // recently played view
     if (view === "recently-played") {
       return (
         <div>
           <h3 className="text-xl font-semibold mb-2">Recently Played</h3>
-          <ul className="space-y-1">
-            {data.items
-              .filter((item) => item.track && item.track.external_urls?.spotify)
-              .map((item, idx) => (
-                <li key={idx}>
-                  <a
-                    href={item.track.external_urls.spotify}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline text-blue-400"
-                  >
-                    {item.track.name} – {item.track.artists[0].name}
-                  </a>
-                </li>
-            ))}
-          </ul>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm text-left">
+              <thead className="bg-gray-700 text-white">
+                <tr>
+                  <th className="px-4 py-2">Track</th>
+                  <th className="px-4 py-2">Artist</th>
+                  <th className="px-4 py-2">Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentTracks.map((track, idx) => (
+                  <tr key={idx} className="border-b border-gray-600">
+                    <td className="px-4 py-2">
+                      <a
+                        href={track.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-green-400 hover:underline"
+                      >
+                        {track.track_name}
+                      </a>
+                    </td>
+                    <td className="px-4 py-2">{track.artist}</td>
+                    <td className="px-4 py-2">
+                      {new Date(track.played_at).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       );
     }
+
 
     return null;
   };
@@ -172,7 +213,7 @@ function SpotifyInsights() {
   );
 }
 
-
+// sdk player
 export default function Page() {
   const { data: session } = useSession();
   const [player, setPlayer] = useState(null);
