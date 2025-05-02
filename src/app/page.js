@@ -5,6 +5,7 @@ import axios from "axios";
 import NowPlaying from "../components/NowPlaying";
 import { Pie } from "react-chartjs-2"; 
 import Chart from "chart.js/auto";
+import { Bar } from "react-chartjs-2";
 
 export function DebugLogout() {
   return (
@@ -52,6 +53,18 @@ function SpotifyInsights() {
     const items = data?.items || [];
 
     if (view === "top-songs") {
+      const chartData = {
+        labels: items.map((track) => track.name),
+        datasets: [
+          {
+            label: "play count",
+            data: items.map((track) => track.play_count || 0),
+            backgroundColor: "rgba(75, 192, 192, 0.6)",
+            borderWidth: 1,
+          },
+        ],
+      };      
+
       return (
         <div>
           <h3 className="text-xl font-semibold mb-2">Your Top Tracks</h3>
@@ -69,6 +82,9 @@ function SpotifyInsights() {
               </li>
             ))}
           </ul>
+          <div className="mt-6 max-w-2x1">
+            <Bar data={chartData} options={{ responsive: true, maintainAspectRatio: false }} />
+          </div>
         </div>
       );
     }

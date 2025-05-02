@@ -21,9 +21,9 @@ export const authOptions = {
             'user-read-playback-state',
             'user-modify-playback-state',
           ].join(' '),
-          show_dialog: true
-        }
-      }
+          show_dialog: true,
+        },
+      },
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
@@ -32,14 +32,18 @@ export const authOptions = {
       if (account) {
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
-        token.expiresAt = account.expires_at * 1000; // Convert to milliseconds
+        token.expiresAt = Date.now() + account.expires_in * 1000; // safer than relying on expires_at
       }
 
-      // Refresh the token if it has expired
       if (Date.now() > token.expiresAt) {
+        console.log("Access token expired, refreshing...");
+
+        if (!token.refreshToken) {
+          throw new Error("No refresh token available");
+        }
+
         try {
-          const url = "https://accounts.spotify.com/api/token";
-          const response = await fetch(url, {
+          const response = await fetch("https://accounts.spotify.com/api/token", {
             method: "POST",
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",

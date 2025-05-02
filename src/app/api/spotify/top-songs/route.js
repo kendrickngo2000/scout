@@ -1,37 +1,3 @@
-// // File: src/app/api/spotify/top-songs/route.js
-// import { getServerSession } from "next-auth";
-// import { authOptions } from "../../auth/[...nextauth]/route";
-// import { NextResponse } from "next/server";
-
-// export const GET = async () => {
-//   try {
-//     const session = await getServerSession(authOptions);
-//     if (!session || !session.user?.accessToken) {
-//       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-//     }
-
-//     const endpoint = "https://api.spotify.com/v1/me/top/tracks?time_range=medium_term&limit=10";
-
-//     const res = await fetch(endpoint, {
-//       headers: {
-//         Authorization: `Bearer ${session.user.accessToken}`,
-//         "Content-Type": "application/json",
-//       },
-//     });
-
-//     if (!res.ok) {
-//       const errText = await res.text();
-//       return NextResponse.json({ error: "Spotify API error", details: errText }, { status: res.status });
-//     }
-
-//     const data = await res.json();
-//     return NextResponse.json({ items: data.items || [] });
-//   } catch (err) {
-//     return NextResponse.json({ error: "Server error", details: err.message }, { status: 500 });
-//   }
-// };
-
-
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
