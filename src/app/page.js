@@ -242,6 +242,8 @@ export default function Page() {
           volume: 0.5,
         });
 
+        window.player = newPlayer;
+
         newPlayer.addListener('ready', ({ device_id }) => {
           console.log('Ready with Device ID', device_id);
           setDeviceId(device_id);
